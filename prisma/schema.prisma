@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum KpiDirection {
+  higher_is_better
+  lower_is_better
+}
+
+enum KpiStatus {
+  CRITICO
+  EN_RIESGO
+  EN_META
+  SUPERADO
+}
+
+enum Periodicity {
+  MENSUAL
+  BIMESTRAL
+  TRIMESTRAL
+  SEMESTRAL
+  ANUAL
+}
+
+enum Quarter {
+  T1
+  T2
+  T3
+  T4
+}
+
+enum ActionStatus {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADA
+  RETRASADA
+}
+
+model Kpi {
+  id                  String          @id @default(uuid()) @db.Uuid
+  code                String          @unique
+  name                String
+  objective           String
+  area                String
+  targetValue         Decimal         @db.Decimal(14, 4)
+  currentValue        Decimal         @db.Decimal(14, 4)
+  unit                String
+  direction           KpiDirection
+  compliancePercentage Decimal       @db.Decimal(8, 2)
+  responsible         String
+  responsibleEmail    String
+  periodicity         Periodicity
+  lastUpdated         DateTime        @db.Date
+  status              KpiStatus
+  observations        String?
+  targetDriveFolder   String?
+
+  baseline2023        Decimal?        @db.Decimal(14, 4)
+  target2024          Decimal?        @db.Decimal(14, 4)
+  target2025          Decimal?        @db.Decimal(14, 4)
+  target2026          Decimal?        @db.Decimal(14, 4)
+  target2027          Decimal?        @db.Decimal(14, 4)
+  target2028          Decimal?        @db.Decimal(14, 4)
+  strategyNotes       String?
+
+  history             Measurement[]
+  tasks               KpiTask[]
+  actionPlans         ActionPlan[]
+  areaTasks           AreaTask[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([area])
+  @@index([status])
+}
+
+model Measurement {
+  id                    String       @id @default(uuid()) @db.Uuid
+  kpiId                 String       @db.Uuid
+  quarter               Quarter
+  year                  Int
+  date                  DateTime     @db.Date
+  targetQuarter         Decimal      @db.Decimal(14, 4)
+  value                 Decimal      @db.Decimal(14, 4)
+  inputA                Decimal?     @db.Decimal(14, 4)
+  inputB                Decimal?     @db.Decimal(14, 4)
+  compliancePercentage  Decimal      @db.Decimal(8, 2)
+  note                  String?
+  registeredBy          String?
+  driveFolderDestination String?
+
+  kpi                   Kpi          @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  attachments           Attachment[]
+  createdAt             DateTime     @default(now())
+
+  @@index([kpiId, year, quarter])
+}
+
+model Attachment {
+  id            String      @id @default(uuid()) @db.Uuid
+  measurementId String      @db.Uuid
+  name          String
+  storageKey    String
+  externalUrl   String?
+  size          Int
+  mimeType      String
+  createdAt     DateTime    @default(now())
+
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+}
+
+model KpiTask {
+  id                 String    @id @default(uuid()) @db.Uuid
+  kpiId              String    @db.Uuid
+  stepNumber         Int
+  title              String
+  description        String
+  scheduledFrequency String
+  scheduledMonth     String?
+  dueDate            DateTime  @db.Date
+  completedDate      DateTime? @db.Date
+  responsible        String
+  status             String
+  observations       String?
+
+  kpi                Kpi       @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([kpiId])
+  @@index([dueDate, status])
+}
+
+model ActionPlan {
+  id               String       @id @default(uuid()) @db.Uuid
+  code             String
+  kpiId            String       @db.Uuid
+  name             String
+  activity         String
+  responsible      String
+  responsibleEmail String
+  startDate        DateTime     @db.Date
+  dueDate          DateTime     @db.Date
+  progress         Int
+  status           ActionStatus
+  observations     String?
+  evidenceUrl      String?
+  evidenceNotes    String?
+
+  kpi              Kpi          @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([kpiId])
+  @@index([dueDate, status])
+}
+
+model AreaTask {
+  id             String       @id @default(uuid()) @db.Uuid
+  code           String
+  area           String
+  processName    String
+  activity       String
+  responsible    String
+  responsibleEmail String
+  quarter        Quarter
+  year           Int
+  startDate      DateTime     @db.Date
+  dueDate        DateTime     @db.Date
+  progress       Int
+  status         ActionStatus
+  deliverables   String
+  linkedKpiId    String?      @db.Uuid
+  observations   String?
+  evidenceUrl    String?
+
+  linkedKpi      Kpi?         @relation(fields: [linkedKpiId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([area, year, quarter])
+}
