@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CreateKpiDto } from './dto/CreateKpiDto.js';
 import { UpdateKpiDto } from './dto/UpdateKpiDto.js';
 import { KpisService } from './kpis.service.js';
@@ -21,6 +23,7 @@ export class KpisController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN)
   create(@Body() dto: CreateKpiDto) {
     return this.kpisService.create(dto);
   }
@@ -31,6 +34,7 @@ export class KpisController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateKpiDto,

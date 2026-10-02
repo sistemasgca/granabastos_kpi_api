@@ -2,9 +2,11 @@
 
 API para el seguimiento de indicadores clave de desempeño (KPI) de Granabastos. El proyecto está construido con NestJS, TypeScript, Prisma y PostgreSQL.
 
-## Estado actual
+## Funcionalidad
 
-El esquema de datos contempla KPIs, mediciones periódicas, archivos adjuntos, tareas, planes de acción y actividades por área. Por ahora, el endpoint HTTP implementado es `GET /`, que responde `Hello World!`; las operaciones para administrar esos datos aún están en desarrollo.
+La API expone operaciones para KPIs, mediciones, tareas de medición, planes de acción, actividades POA y alertas. Las rutas requieren JWT salvo el inicio de sesión y `GET /api`.
+
+Los roles disponibles son `ADMIN`, `EDITOR` y `VIEWER`. Consulta [AUTHENTICATION.md](./AUTHENTICATION.md) para crear el primer administrador, aplicar la migración en una base de desarrollo y probar la API.
 
 ## Requisitos
 
@@ -43,7 +45,7 @@ Inicia la API en modo desarrollo:
 npm run start:dev
 ```
 
-La aplicación estará disponible en `http://localhost:3000` (o en el puerto definido en `PORT`).
+La aplicación estará disponible en el puerto configurado en `PORT` (recomendado: `3001` para no interferir con el frontend).
 
 ## Scripts
 

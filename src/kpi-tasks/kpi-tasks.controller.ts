@@ -9,6 +9,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CreateKpiTaskDto } from './dto/create-kpi-task.dto.js';
 import { UpdateKpiTaskDto } from './dto/update-kpi-task.dto.js';
 import { KpiTasksService } from './kpi-tasks.service.js';
@@ -28,11 +30,13 @@ export class KpiTasksController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   create(@Body() dto: CreateKpiTaskDto) {
     return this.kpiTasksService.create(dto);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateKpiTaskDto,
@@ -41,6 +45,7 @@ export class KpiTasksController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.kpiTasksService.remove(id);
   }

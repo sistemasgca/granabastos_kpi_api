@@ -9,6 +9,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CreateAreaTaskDto } from './dto/create-area-task.dto.js';
 import { UpdateAreaTaskDto } from './dto/update-area-task.dto.js';
 import { AreaTasksService } from './area-tasks.service.js';
@@ -32,11 +34,13 @@ export class AreaTasksController {
   }
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   create(@Body() dto: CreateAreaTaskDto) {
     return this.areaTasksService.create(dto);
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAreaTaskDto,
@@ -45,6 +49,7 @@ export class AreaTasksController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.EDITOR)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.areaTasksService.remove(id);
   }

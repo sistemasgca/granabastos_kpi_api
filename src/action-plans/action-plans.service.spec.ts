@@ -2,9 +2,16 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ActionPlansService } from './action-plans.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { UserRole } from '@prisma/client';
 
 describe('ActionPlansService', () => {
   let service: ActionPlansService;
+  const actor = {
+    id: '709ef035-9500-43ba-8aca-cdcf86434b14',
+    email: 'admin@example.com',
+    name: 'Admin',
+    role: UserRole.ADMIN,
+  };
   const prisma = {
     kpi: { findUnique: vi.fn() },
     actionPlan: {
@@ -49,7 +56,7 @@ describe('ActionPlansService', () => {
       startDate: '2026-10-01',
       dueDate: '2026-12-01',
       progress: 0,
-    });
+    }, actor);
 
     expect(prisma.actionPlan.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -73,7 +80,7 @@ describe('ActionPlansService', () => {
         startDate: '2026-12-02',
         dueDate: '2026-12-01',
         progress: 0,
-      }),
+      }, actor),
     ).rejects.toThrow('La fecha de inicio no puede ser posterior');
     expect(prisma.actionPlan.create).not.toHaveBeenCalled();
   });

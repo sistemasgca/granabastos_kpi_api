@@ -6,6 +6,7 @@ import {
 import { ActionStatus } from '@prisma/client';
 import { isUUID } from 'class-validator';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.js';
 import { CreateActionPlanDto } from './dto/create-action-plan.dto.js';
 import { UpdateActionPlanDto } from './dto/update-action-plan.dto.js';
 
@@ -39,7 +40,7 @@ export class ActionPlansService {
     return plan;
   }
 
-  async create(dto: CreateActionPlanDto) {
+  async create(dto: CreateActionPlanDto, user: AuthenticatedUser) {
     await this.ensureKpiExists(dto.kpiId);
     this.ensureDateRange(dto.startDate, dto.dueDate);
 
@@ -55,6 +56,8 @@ export class ActionPlansService {
         dueDate: new Date(dto.dueDate),
         progress: dto.progress,
         status: this.determineStatus(dto.dueDate, dto.progress),
+        createdById: user.id,
+        updatedById: user.id,
         observations: dto.observations,
         evidenceUrl: dto.evidenceUrl,
         evidenceNotes: dto.evidenceNotes,
@@ -63,7 +66,11 @@ export class ActionPlansService {
     });
   }
 
-  async update(id: string, dto: UpdateActionPlanDto) {
+  async update(
+    id: string,
+    dto: UpdateActionPlanDto,
+    user: AuthenticatedUser,
+  ) {
     if (Object.keys(dto).length === 0) {
       throw new BadRequestException('Debe enviar al menos un campo para actualizar.');
     }
@@ -82,12 +89,13 @@ export class ActionPlansService {
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
         status: this.determineStatus(dueDate, progress),
+        updatedById: user.id,
       },
       include: actionInclude,
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string, _user: AuthenticatedUser) {
     await this.findOne(id);
     await this.prisma.actionPlan.delete({ where: { id } });
     return { id, deleted: true };

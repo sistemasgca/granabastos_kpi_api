@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 enum KpiDirection {
   higher_is_better
   lower_is_better
@@ -47,77 +46,102 @@ enum ActionStatus {
   RETRASADA
 }
 
-model Kpi {
-  id                  String          @id @default(uuid()) @db.Uuid
-  code                String          @unique
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model User {
+  id                  String        @id @default(uuid()) @db.Uuid
+  email               String        @unique
   name                String
-  objective           String
-  area                String
-  targetValue         Decimal         @db.Decimal(14, 4)
-  currentValue        Decimal         @db.Decimal(14, 4)
-  unit                String
-  direction           KpiDirection
-  compliancePercentage Decimal       @db.Decimal(8, 2)
-  responsible         String
-  responsibleEmail    String
-  periodicity         Periodicity
-  lastUpdated         DateTime        @db.Date
-  status              KpiStatus
-  observations        String?
-  targetDriveFolder   String?
+  passwordHash        String
+  role                UserRole      @default(VIEWER)
+  isActive            Boolean       @default(true)
+  tokenVersion        Int           @default(0)
+  createdMeasurements Measurement[] @relation("MeasurementCreatedBy")
+  createdActionPlans  ActionPlan[]  @relation("ActionPlanCreatedBy")
+  updatedActionPlans  ActionPlan[]  @relation("ActionPlanUpdatedBy")
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
-  baseline2023        Decimal?        @db.Decimal(14, 4)
-  target2024          Decimal?        @db.Decimal(14, 4)
-  target2025          Decimal?        @db.Decimal(14, 4)
-  target2026          Decimal?        @db.Decimal(14, 4)
-  target2027          Decimal?        @db.Decimal(14, 4)
-  target2028          Decimal?        @db.Decimal(14, 4)
-  strategyNotes       String?
+  @@index([role, isActive])
+}
 
-  history             Measurement[]
-  tasks               KpiTask[]
-  actionPlans         ActionPlan[]
-  areaTasks           AreaTask[]
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+model Kpi {
+  id                   String       @id @default(uuid()) @db.Uuid
+  code                 String       @unique
+  name                 String
+  objective            String
+  area                 String
+  targetValue          Decimal      @db.Decimal(14, 4)
+  currentValue         Decimal      @db.Decimal(14, 4)
+  unit                 String
+  direction            KpiDirection
+  compliancePercentage Decimal      @db.Decimal(8, 2)
+  responsible          String
+  responsibleEmail     String
+  periodicity          Periodicity
+  lastUpdated          DateTime     @db.Date
+  status               KpiStatus
+  observations         String?
+  targetDriveFolder    String?
+
+  baseline2023  Decimal? @db.Decimal(14, 4)
+  target2024    Decimal? @db.Decimal(14, 4)
+  target2025    Decimal? @db.Decimal(14, 4)
+  target2026    Decimal? @db.Decimal(14, 4)
+  target2027    Decimal? @db.Decimal(14, 4)
+  target2028    Decimal? @db.Decimal(14, 4)
+  strategyNotes String?
+
+  history     Measurement[]
+  tasks       KpiTask[]
+  actionPlans ActionPlan[]
+  areaTasks   AreaTask[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([area])
   @@index([status])
 }
 
 model Measurement {
-  id                    String       @id @default(uuid()) @db.Uuid
-  kpiId                 String       @db.Uuid
-  quarter               Quarter
-  year                  Int
-  date                  DateTime     @db.Date
-  targetQuarter         Decimal      @db.Decimal(14, 4)
-  value                 Decimal      @db.Decimal(14, 4)
-  inputA                Decimal?     @db.Decimal(14, 4)
-  inputB                Decimal?     @db.Decimal(14, 4)
-  compliancePercentage  Decimal      @db.Decimal(8, 2)
-  note                  String?
-  registeredBy          String?
+  id                     String   @id @default(uuid()) @db.Uuid
+  kpiId                  String   @db.Uuid
+  quarter                Quarter
+  year                   Int
+  date                   DateTime @db.Date
+  targetQuarter          Decimal  @db.Decimal(14, 4)
+  value                  Decimal  @db.Decimal(14, 4)
+  inputA                 Decimal? @db.Decimal(14, 4)
+  inputB                 Decimal? @db.Decimal(14, 4)
+  compliancePercentage   Decimal  @db.Decimal(8, 2)
+  note                   String?
+  registeredBy           String?
   driveFolderDestination String?
+  createdById            String?  @db.Uuid
 
-  kpi                   Kpi          @relation(fields: [kpiId], references: [id], onDelete: Restrict)
-  attachments           Attachment[]
-  createdAt             DateTime     @default(now())
+  kpi         Kpi          @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  createdBy   User?        @relation("MeasurementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  attachments Attachment[]
+  createdAt   DateTime     @default(now())
 
   @@index([kpiId, year, quarter])
 }
 
 model Attachment {
-  id            String      @id @default(uuid()) @db.Uuid
-  measurementId String      @db.Uuid
+  id            String   @id @default(uuid()) @db.Uuid
+  measurementId String   @db.Uuid
   name          String
   storageKey    String
   externalUrl   String?
   size          Int
   mimeType      String
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime @default(now())
 
-  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  measurement Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
 }
 
 model KpiTask {
@@ -134,9 +158,9 @@ model KpiTask {
   status             String
   observations       String?
 
-  kpi                Kpi       @relation(fields: [kpiId], references: [id], onDelete: Restrict)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  kpi       Kpi      @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([kpiId])
   @@index([dueDate, status])
@@ -157,37 +181,41 @@ model ActionPlan {
   observations     String?
   evidenceUrl      String?
   evidenceNotes    String?
+  createdById      String?      @db.Uuid
+  updatedById      String?      @db.Uuid
 
-  kpi              Kpi          @relation(fields: [kpiId], references: [id], onDelete: Restrict)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  kpi       Kpi      @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  createdBy User?    @relation("ActionPlanCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?    @relation("ActionPlanUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([kpiId])
   @@index([dueDate, status])
 }
 
 model AreaTask {
-  id             String       @id @default(uuid()) @db.Uuid
-  code           String
-  area           String
-  processName    String
-  activity       String
-  responsible    String
+  id               String       @id @default(uuid()) @db.Uuid
+  code             String
+  area             String
+  processName      String
+  activity         String
+  responsible      String
   responsibleEmail String
-  quarter        Quarter
-  year           Int
-  startDate      DateTime     @db.Date
-  dueDate        DateTime     @db.Date
-  progress       Int
-  status         ActionStatus
-  deliverables   String
-  linkedKpiId    String?      @db.Uuid
-  observations   String?
-  evidenceUrl    String?
+  quarter          Quarter
+  year             Int
+  startDate        DateTime     @db.Date
+  dueDate          DateTime     @db.Date
+  progress         Int
+  status           ActionStatus
+  deliverables     String
+  linkedKpiId      String?      @db.Uuid
+  observations     String?
+  evidenceUrl      String?
 
-  linkedKpi      Kpi?         @relation(fields: [linkedKpiId], references: [id], onDelete: SetNull)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  linkedKpi Kpi?     @relation(fields: [linkedKpiId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([area, year, quarter])
 }
