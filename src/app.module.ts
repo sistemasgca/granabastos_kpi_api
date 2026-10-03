@@ -11,6 +11,7 @@ import { ActionPlansModule } from './action-plans/action-plans.module.js';
 import { AreaTasksModule } from './area-tasks/area-tasks.module.js';
 import { AlertsModule } from './alerts/alerts.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { FilesModule } from './files/files.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -32,6 +33,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AreaTasksModule,
     AlertsModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -60,7 +60,15 @@ const quarterlyTargets: Record<string, Record<number, Record<Quarter, number>>> 
 const measurementInclude = {
   kpi: { select: { id: true, code: true, name: true } },
   createdBy: { select: { id: true, email: true, name: true } },
-  attachments: true,
+  attachments: {
+    select: {
+      id: true,
+      name: true,
+      size: true,
+      mimeType: true,
+      createdAt: true,
+    },
+  },
 } as const;
 
 @Injectable()

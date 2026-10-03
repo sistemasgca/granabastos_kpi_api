@@ -63,6 +63,7 @@ model User {
   createdMeasurements Measurement[] @relation("MeasurementCreatedBy")
   createdActionPlans  ActionPlan[]  @relation("ActionPlanCreatedBy")
   updatedActionPlans  ActionPlan[]  @relation("ActionPlanUpdatedBy")
+  uploadedAttachments Attachment[]  @relation("AttachmentUploadedBy")
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
@@ -139,9 +140,13 @@ model Attachment {
   externalUrl   String?
   size          Int
   mimeType      String
+  uploadedById  String?  @db.Uuid
   createdAt     DateTime @default(now())
 
   measurement Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  uploadedBy  User?       @relation("AttachmentUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([measurementId, createdAt])
 }
 
 model KpiTask {

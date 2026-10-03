@@ -4,9 +4,9 @@
 
 | Rol | Permisos |
 | --- | --- |
-| `VIEWER` | Consultar recursos y alertas. |
-| `EDITOR` | Consultar; registrar mediciones; crear, actualizar y eliminar tareas, planes y actividades POA. |
-| `ADMIN` | Todos los permisos, incluidas la administracion de usuarios y la edicion de la ficha y metas del KPI. |
+| `VIEWER` | Consultar recursos, alertas y evidencias. |
+| `EDITOR` | Consultar; registrar mediciones y cargar evidencias; crear, actualizar y eliminar tareas, planes y actividades POA. |
+| `ADMIN` | Todos los permisos, incluida la eliminacion de evidencias, administracion de usuarios y edicion de la ficha y metas del KPI. |
 
 Todas las rutas requieren un token Bearer, excepto `GET /api` y `POST /api/auth/login`.
 El rol se obtiene de la base de datos en cada solicitud; desactivar una cuenta retira

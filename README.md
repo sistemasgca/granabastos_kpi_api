@@ -4,7 +4,7 @@ API para el seguimiento de indicadores clave de desempeño (KPI) de Granabastos.
 
 ## Funcionalidad
 
-La API expone operaciones para KPIs, mediciones, tareas de medición, planes de acción, actividades POA y alertas. Las rutas requieren JWT salvo el inicio de sesión y `GET /api`.
+La API expone operaciones para KPIs, mediciones, tareas de medición, planes de acción, actividades POA, alertas y evidencias privadas almacenadas en Google Drive. Las rutas requieren JWT salvo el inicio de sesión y `GET /api`.
 
 Los roles disponibles son `ADMIN`, `EDITOR` y `VIEWER`. Consulta [AUTHENTICATION.md](./AUTHENTICATION.md) para crear el primer administrador, aplicar la migración en una base de desarrollo y probar la API.
 
@@ -57,6 +57,12 @@ La aplicación estará disponible en el puerto configurado en `PORT` (recomendad
 | `npm run lint` | Analiza el código fuente y las pruebas. |
 | `npm run test` | Ejecuta las pruebas unitarias. |
 | `npm run test:e2e` | Ejecuta las pruebas end-to-end. |
+
+## Evidencias privadas en Google Drive
+
+La carga, descarga y configuración de evidencias se explica en
+[EVIDENCE.md](./EVIDENCE.md). Esta integración requiere credenciales de una cuenta
+de servicio y un folder ID de una unidad compartida; no hace públicos los archivos.
 
 ## Tecnologías
 
